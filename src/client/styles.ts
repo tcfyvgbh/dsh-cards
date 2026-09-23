@@ -94,6 +94,7 @@ export const STYLE_TEXT = `
 .dshc-note { color: var(--dshc-fg2); font-size: 13px; }
 .dshc-note summary { cursor: pointer; }
 .dshc-pre { margin: 8px 0 0; white-space: pre-wrap; font-family: var(--ds-font-family-code, ui-monospace, monospace); font-size: 12px; }
+.dshc-tail { margin: 8px 0; }
 `
 
 /** Add the stylesheet once; the returned disposer removes only a tag this call created. */

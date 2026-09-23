@@ -17,7 +17,10 @@ export function Axes({ frame, domain, labels, xOf }: {
         </g>
       ))}
       {labels.map((label, index) => (index % stride === 0
-        ? <text key={index} className="dshc-tick dshc-xlabel" x={xOf(index)} y={frame.height - 8} textAnchor="middle">{label}</text>
+        ? (
+            <text key={index} className="dshc-tick dshc-xlabel" x={xOf(index)} y={frame.height - 8}
+              textAnchor={xOf(index) >= frame.width - frame.right ? 'end' : 'middle'}>{label}</text>
+          )
         : null))}
     </g>
   )

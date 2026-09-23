@@ -80,4 +80,10 @@ describe('Chart', () => {
     expect(bars.container.querySelector('svg')?.getAttribute('viewBox')).toBe('0 0 320 220')
     vi.unstubAllGlobals()
   })
+
+  it('right-aligns an x-axis label that sits on the right edge so it is not clipped', () => {
+    const { container } = render(<Chart node={{ type: 'chart', kind: 'line', labels: ['00', '12', '24'], series: [{ name: 's', data: [1, 2, 3] }] }} />)
+    const anchors = Array.from(container.querySelectorAll('text.dshc-xlabel')).map(label => label.getAttribute('text-anchor'))
+    expect(anchors).toEqual(['middle', 'middle', 'end'])
+  })
 })

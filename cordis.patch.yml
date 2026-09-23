@@ -1,0 +1,5 @@
+# dsh-cards: display-only UI cards rendered from the render_cards tool.
+# Install: dsh plugin --profile web add link:/path/to/dsh-cards
+- insert:
+    - id: dsh-cards
+      name: dsh-cards

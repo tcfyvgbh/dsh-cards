@@ -1,0 +1,41 @@
+{
+  "name": "dsh-cards",
+  "version": "0.1.0",
+  "description": "Display-only UI cards for DeepSeek Harness, rendered from the render_cards tool through the tool.call.toolview slot.",
+  "type": "module",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js"
+  },
+  "files": ["lib", "cordis.patch.yml"],
+  "keywords": ["dsh-plugin", "dsh", "deepseek-harness", "genui", "cards"],
+  "dsh": {
+    "bundle": { "patch": "./cordis.patch.yml" },
+    "client": { "platform": "web" }
+  },
+  "scripts": {
+    "build": "tsdown && tsx build/client.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.0"
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "^4.0.4",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^24.0.0",
+    "@types/react": "~18.3.1",
+    "@types/react-dom": "~18.3.1",
+    "jsdom": "29.1.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tsdown": "^0.22.2",
+    "tsx": "^4.19.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
+  }
+}

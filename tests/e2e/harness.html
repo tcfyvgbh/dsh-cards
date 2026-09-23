@@ -29,7 +29,7 @@
     return modules[id]
   })
   let View = null
-  plugin.apply({ effect: setup => setup(), slots: { inject: (_slot, factory) => factory(), register: (_meta, component) => { View = component } } })
+  plugin.apply({ effect: setup => setup(), inject: () => {}, slots: { inject: (_slot, factory) => factory(), register: (meta, component) => { if (meta.key === 'render_cards') View = component } } })
   const spec = {
     title: '服务运行看板',
     items: [

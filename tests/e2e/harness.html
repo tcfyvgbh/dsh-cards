@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>dsh-cards harness</title>
+<style>body { font-family: system-ui, sans-serif; margin: 24px; max-width: 860px; }</style>
+<script src="../../node_modules/react/umd/react.production.min.js"></script>
+<script src="../../node_modules/react-dom/umd/react-dom.production.min.js"></script>
+<script>
+  window.__entries = []
+  window.__ModuleLoader__ = { load(entry) { window.__entries.push(entry) } }
+</script>
+<script src="../../lib/client.js"></script>
+</head>
+<body>
+<div id="app"></div>
+<script>
+  // Headless Chrome has a 500px minimum viewport; #narrow emulates a 380px phone (332px content).
+  if (location.hash === '#narrow') document.body.style.maxWidth = '332px'
+  const withKey = (props, key) => (key === undefined ? props : Object.assign({}, props, { key }))
+  const jsxRuntime = {
+    Fragment: React.Fragment,
+    jsx: (type, props, key) => React.createElement(type, withKey(props, key)),
+    jsxs: (type, props, key) => React.createElement(type, withKey(props, key)),
+  }
+  const modules = { react: React, 'react/jsx-runtime': jsxRuntime }
+  const plugin = window.__entries[0].factory(id => {
+    if (!(id in modules)) throw new Error('unexpected require ' + id)
+    return modules[id]
+  })
+  let View = null
+  plugin.apply({ effect: setup => setup(), slots: { inject: (_slot, factory) => factory(), register: (_meta, component) => { View = component } } })
+  const spec = {
+    title: '服务运行看板',
+    items: [
+      { type: 'grid', cols: 4, items: [
+        { type: 'stat', label: '请求吞吐', value: '3,231/min', delta: '+6.8%', spark: [2680, 2790, 2910, 3020, 3190, 3120, 3231] },
+        { type: 'stat', label: 'P95 延迟', value: '104 ms', delta: '-8.3%', better: 'down', spark: [132, 128, 121, 118, 112, 108, 104] },
+        { type: 'stat', label: '可用率', value: '99.82%', delta: '+0.06pp' },
+        { type: 'stat', label: '错误率', value: '0.61%', delta: '+0.12pp', better: 'down' },
+      ] },
+      { type: 'grid', cols: 2, items: [
+        { type: 'chart', kind: 'line', title: '24h 请求量', labels: ['00', '04', '08', '12', '16', '20'], series: [{ name: '请求', data: [1200, 900, 2400, 3100, 2900, 2100] }, { name: '错误', data: [20, 12, 40, 55, 38, 30] }] },
+        { type: 'chart', kind: 'donut', title: '流量来源', labels: ['Web', 'App', 'API'], series: [{ name: '占比', data: [45, 35, 20] }] },
+      ] },
+      { type: 'table', columns: ['服务', '负责人', 'QPS', '可用率', '状态'], types: ['text', 'text', 'num', 'bar', 'badge'], rows: [
+        ['payment-gateway', '@lin', '8,420', '99.52%', '故障'],
+        ['search-index', '@wang', '15,430', '99.88%', '正常'],
+        ['report-engine', '@wu', '1,180', '99.98%', '正常'],
+        ['legacy-sync', '@zhou', '—', '97.10%', '降级'],
+      ] },
+      { type: 'chart', kind: 'bar', title: '各区域错误数', labels: ['华东', '华北', '华南', '西南'], series: [{ name: '昨日', data: [12, 8, 15, 4] }, { name: '今日', data: [9, 11, 6, 5] }] },
+      { type: 'callout', tone: 'warning', title: '需要关注', content: '`payment-gateway` 错误率已越过 **3%** 告警线。' },
+      { type: 'keyvalue', pairs: [{ key: '交付文件', value: 'calculator.html' }, { key: '行数', value: 798 }] },
+    ],
+  }
+  const block = { kind: 'tool-result', call: { name: 'render_cards', argsRaw: JSON.stringify({ spec }) }, content: [], isError: false, subCalls: [] }
+  ReactDOM.createRoot(document.getElementById('app')).render(React.createElement(View, { block }))
+</script>
+</body>
+</html>

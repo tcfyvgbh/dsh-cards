@@ -7,6 +7,8 @@ import { apply, inject, name } from '../src/client/index.ts'
 import { installStyle } from '../src/client/styles.ts'
 import { act } from '@testing-library/react'
 import { markShown } from '../src/client/shown-cards.ts'
+import { TurnCardsTail } from '../src/client/TurnCardsTail.tsx'
+import { turnCardsDefinition } from '../src/client/turn-cards.ts'
 
 afterEach(cleanup)
 
@@ -102,27 +104,59 @@ describe('CardErrorBoundary', () => {
 })
 
 describe('client entry', () => {
-  it('declares identity and registers the toolview key with a removable style tag', () => {
-    expect(name).toBe('dsh-cards')
-    expect(inject).toEqual(['slots'])
+  function fakeClient(withConversation: boolean) {
     const calls: unknown[] = []
     const disposers: (() => void)[] = []
-    const info = vi.spyOn(console, 'info').mockImplementation(() => undefined)
-    apply({
+    const slots = {
+      inject: (slot: string, factory: () => unknown) => { calls.push(['inject', slot]); factory() },
+      register: (meta: unknown, component: unknown) => { calls.push(['register', meta, component]) },
+    }
+    const ctx = {
       effect: (setup: () => () => void) => { disposers.push(setup()) },
-      slots: {
-        inject: (slot: string, factory: () => unknown) => { calls.push(['inject', slot]); factory() },
-        register: (meta: unknown, component: unknown) => { calls.push(['register', meta, component]) },
+      slots,
+      inject: (deps: readonly string[], callback: (scope: unknown) => void) => {
+        calls.push(['scope', deps])
+        if (!withConversation) return
+        callback({
+          slots,
+          uiConversation: { events: { register: (definition: unknown) => { calls.push(['definition', definition]); return () => {} } } },
+        })
       },
-    } as never)
+    }
+    return { ctx, calls, disposers }
+  }
+
+  it('registers the toolview, the turn-cards definition and the turn tail, with a removable style tag', () => {
+    expect(name).toBe('dsh-cards')
+    expect(inject).toEqual(['slots'])
+    const info = vi.spyOn(console, 'info').mockImplementation(() => undefined)
+    const { ctx, calls, disposers } = fakeClient(true)
+    apply(ctx as never)
     expect(calls).toEqual([
       ['inject', 'tool.call.toolview'],
       ['register', { name: 'tool.call.toolview', key: 'render_cards' }, CardsView],
+      ['scope', ['slots', 'uiConversation']],
+      ['definition', turnCardsDefinition],
+      ['inject', 'conversation.chat.turnTail'],
+      ['register', { name: 'conversation.chat.turnTail', id: 'dsh-cards' }, TurnCardsTail],
     ])
     expect(info).toHaveBeenCalledWith('[dsh-cards] client active')
     expect(document.querySelectorAll('style[data-plugin="dsh-cards"]')).toHaveLength(1)
     disposers.forEach(dispose => dispose())
     expect(document.querySelector('style[data-plugin="dsh-cards"]')).toBeNull()
+    info.mockRestore()
+  })
+
+  it('keeps v1 behavior when the host has no uiConversation service (Review Focus 4)', () => {
+    const info = vi.spyOn(console, 'info').mockImplementation(() => undefined)
+    const { ctx, calls, disposers } = fakeClient(false)
+    apply(ctx as never)
+    expect(calls).toEqual([
+      ['inject', 'tool.call.toolview'],
+      ['register', { name: 'tool.call.toolview', key: 'render_cards' }, CardsView],
+      ['scope', ['slots', 'uiConversation']],
+    ])
+    disposers.forEach(dispose => dispose())
     info.mockRestore()
   })
 

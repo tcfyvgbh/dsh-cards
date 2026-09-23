@@ -37,12 +37,22 @@ describe('lib/client.js', () => {
 
     const registered: unknown[] = []
     const info = vi.spyOn(console, 'info').mockImplementation(() => undefined)
+    const definitions: unknown[] = []
+    const slots = { inject: (_slot: string, factory: () => unknown) => factory(), register: (meta: unknown) => { registered.push(meta) } }
     ;(plugin.apply as (ctx: unknown) => void)({
       effect: (setup: () => () => void) => setup(),
-      slots: { inject: (_slot: string, factory: () => unknown) => factory(), register: (meta: unknown) => { registered.push(meta) } },
+      slots,
+      inject: (_deps: readonly string[], callback: (scope: unknown) => void) => callback({
+        slots,
+        uiConversation: { events: { register: (definition: { kind: string }) => { definitions.push(definition.kind); return () => {} } } },
+      }),
     })
     info.mockRestore()
-    expect(registered).toEqual([{ name: 'tool.call.toolview', key: 'render_cards' }])
+    expect(registered).toEqual([
+      { name: 'tool.call.toolview', key: 'render_cards' },
+      { name: 'conversation.chat.turnTail', id: 'dsh-cards' },
+    ])
+    expect(definitions).toEqual(['dsh-cards'])
   })
 })
 

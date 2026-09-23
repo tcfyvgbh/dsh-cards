@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import type { Node, Spec } from '../spec/types.ts'
+import { Chart } from './charts/Chart.tsx'
 import { renderInline } from './inline.tsx'
 import { Card, Grid, Row } from './nodes/Layout.tsx'
 import { Stat } from './nodes/Stat.tsx'
@@ -18,7 +19,7 @@ export function renderNode(node: Node, key: number): ReactNode {
     case 'badge': return <Badge key={key} text={node.text} tone={node.tone} />
     case 'stat': return <Stat key={key} node={node} />
     case 'table': return <Table key={key} node={node} />
-    case 'chart': return null
+    case 'chart': return <Chart key={key} node={node} />
   }
 }
 

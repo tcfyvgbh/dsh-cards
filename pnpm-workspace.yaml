@@ -1,0 +1,4 @@
+# pnpm 11 fails install when a dependency's build script is neither allowed nor denied.
+# esbuild (via tsx/tsdown) verifies its native binary in postinstall; allow it, as deepseek-harness does.
+allowBuilds:
+  esbuild: true

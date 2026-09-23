@@ -46,9 +46,17 @@ describe('table sorting helpers', () => {
     expect(rows.map(row => row[0])).toEqual(['a', 'b', 'c', 'd'])
   })
 
-  it('sorts text containing digits as text (Review Focus 3)', () => {
+  it('sorts text containing digits as text in natural order (Review Focus 3)', () => {
     const rows = [['v2-api'], ['auth'], ['v10-api']] as const
-    expect(sortRows(rows, { column: 0, direction: 'asc' }).map(row => row[0])).toEqual(['auth', 'v10-api', 'v2-api'])
+    expect(sortRows(rows, { column: 0, direction: 'asc' }).map(row => row[0])).toEqual(['auth', 'v2-api', 'v10-api'])
+  })
+
+  it('sorts ISO dates, times and versions correctly (final review #2)', () => {
+    const asc = { column: 0, direction: 'asc' } as const
+    const firsts = (rows: readonly (readonly string[])[]) => sortRows(rows, asc).map(row => row[0])
+    expect(firsts([['2026-09-23'], ['2026-01-05'], ['2025-12-31']])).toEqual(['2025-12-31', '2026-01-05', '2026-09-23'])
+    expect(firsts([['10:15'], ['09:30'], ['23:00']])).toEqual(['09:30', '10:15', '23:00'])
+    expect(firsts([['1.10.0'], ['1.9.0'], ['1.2.3']])).toEqual(['1.2.3', '1.9.0', '1.10.0'])
   })
 })
 

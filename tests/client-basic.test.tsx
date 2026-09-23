@@ -29,6 +29,15 @@ describe('format helpers', () => {
     expect(numericValue(7)).toBe(7)
   })
 
+  it('treats a cell as numeric only when the whole value is a number with an optional unit (final review #2)', () => {
+    expect(numericValue('3,231/min')).toBe(3231)
+    expect(numericValue('+0.06pp')).toBe(0.06)
+    expect(numericValue('2026-09-23')).toBeUndefined()
+    expect(numericValue('09:30')).toBeUndefined()
+    expect(numericValue('1.10.0')).toBeUndefined()
+    expect(numericValue('12 / 12')).toBeUndefined()
+  })
+
   it('compares numbers before text regardless of direction', () => {
     expect(compareCells('10', '9', 1)).toBeGreaterThan(0)
     expect(compareCells('10', '9', -1)).toBeLessThan(0)

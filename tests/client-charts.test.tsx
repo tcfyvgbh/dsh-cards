@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { cleanup, render } from '@testing-library/react'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { Chart } from '../src/client/charts/Chart.tsx'
 import { formatTick, labelStride, niceDomain, niceStep, ticks } from '../src/client/charts/scale.ts'
 import type { ChartNode } from '../src/spec/types.ts'
@@ -62,5 +62,22 @@ describe('Chart', () => {
     expect(container.querySelectorAll('circle.dshc-slice')).toHaveLength(2)
     const legend = Array.from(container.querySelectorAll('.dshc-legend li')).map(item => item.textContent)
     expect(legend).toEqual(['a 1（25%）', 'b 0（0%）', 'c 3（75%）'])
+  })
+
+  it('sizes line and bar viewBoxes to the measured container width so text stays at CSS size (final review #1)', () => {
+    class FakeResizeObserver {
+      constructor(private readonly callback: (entries: readonly { contentRect: { width: number } }[]) => void) {}
+      observe(): void { this.callback([{ contentRect: { width: 320 } }]) }
+      disconnect(): void {}
+    }
+    vi.stubGlobal('ResizeObserver', FakeResizeObserver)
+    const hours = Array.from({ length: 12 }, (_, i) => `${String(i * 2).padStart(2, '0')}:00`)
+    const { container } = render(<Chart node={{ type: 'chart', kind: 'line', labels: hours, series: [{ name: 's', data: hours.map((_, i) => i) }] }} />)
+    expect(container.querySelector('svg')?.getAttribute('viewBox')).toBe('0 0 320 220')
+    expect(container.querySelectorAll('text.dshc-xlabel')).toHaveLength(4)
+    cleanup()
+    const bars = render(<Chart node={{ type: 'chart', kind: 'bar', labels: ['a', 'b'], series: [{ name: 's', data: [1, 2] }] }} />)
+    expect(bars.container.querySelector('svg')?.getAttribute('viewBox')).toBe('0 0 320 220')
+    vi.unstubAllGlobals()
   })
 })

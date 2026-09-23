@@ -9,6 +9,20 @@ export interface Frame {
 
 export const FRAME: Frame = { width: 600, height: 220, left: 48, right: 12, top: 12, bottom: 28 }
 
+const MIN_WIDTH = 240
+/** Horizontal room one x-axis label needs at the 11px tick font size. */
+const LABEL_SLOT = 48
+
+/** A frame whose viewBox width equals the rendered pixel width, so SVG text stays at its CSS size. */
+export function frameFor(width: number): Frame {
+  return { ...FRAME, width: Math.max(MIN_WIDTH, Math.round(width)) }
+}
+
+/** How many x-axis labels fit without overlapping. */
+export function maxLabelsFor(frame: Frame): number {
+  return Math.max(2, Math.floor((frame.width - frame.left - frame.right) / LABEL_SLOT))
+}
+
 export interface Domain { readonly lo: number; readonly hi: number; readonly step: number }
 
 export function niceStep(raw: number): number {

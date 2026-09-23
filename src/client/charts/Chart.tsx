@@ -4,6 +4,8 @@ import { BarChart } from './BarChart.tsx'
 import { DonutChart } from './DonutChart.tsx'
 import { LineChart } from './LineChart.tsx'
 import { seriesColor } from './palette.ts'
+import { FRAME } from './scale.ts'
+import { useWidth } from './useWidth.ts'
 
 interface LegendEntry { readonly label: string; readonly color: string }
 
@@ -22,11 +24,14 @@ function legendOf(node: ChartNode): readonly LegendEntry[] {
 
 export function Chart({ node }: { readonly node: ChartNode }) {
   const legend = legendOf(node)
-  const body = node.kind === 'line' ? <LineChart node={node} /> : node.kind === 'bar' ? <BarChart node={node} /> : <DonutChart node={node} />
+  const [boxRef, width] = useWidth(FRAME.width)
+  const body = node.kind === 'line'
+    ? <LineChart node={node} width={width} />
+    : node.kind === 'bar' ? <BarChart node={node} width={width} /> : <DonutChart node={node} />
   return (
     <figure className="dshc-chart">
       {node.title !== undefined && <figcaption className="dshc-chart-title">{renderInline(node.title)}</figcaption>}
-      {body}
+      <div ref={boxRef} className="dshc-chart-box">{body}</div>
       {legend.length > 0 && (
         <ul className="dshc-legend">
           {legend.map((entry, index) => (

@@ -82,7 +82,8 @@ export const STYLE_TEXT = `
 .dshc-chart { margin: 0; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .dshc-chart-title { font-weight: 600; }
 .dshc-chart-svg { width: 100%; height: auto; }
-.dshc-donut { max-width: 200px; align-self: center; }
+.dshc-chart-box { width: 100%; min-width: 0; }
+.dshc-donut { display: block; max-width: 200px; margin: 0 auto; }
 .dshc-gridline { stroke: var(--dshc-border); stroke-width: 1; }
 .dshc-zero { stroke: var(--dshc-fg3); }
 .dshc-tick { fill: var(--dshc-fg3); font-size: 11px; }

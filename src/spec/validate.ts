@@ -7,6 +7,7 @@ import {
   bool, cell, describe, each, fail, intRange, isRecord, list, object, ok, oneOf, optional, str,
   type Checked, type Rule, type SpecError,
 } from './check.ts'
+import { DATA_RULES } from './data-rules.ts'
 
 export type ValidationResult =
   | { readonly ok: true; readonly spec: Spec; readonly nodes: number }
@@ -68,7 +69,7 @@ const BASE_RULES: Readonly<Record<string, Rule>> = {
   }),
 }
 
-const RULES: Readonly<Record<string, Rule>> = { ...BASE_RULES }
+const RULES: Readonly<Record<string, Rule>> = { ...BASE_RULES, ...DATA_RULES }
 const TYPES = Object.keys(RULES)
 
 function node(value: unknown, path: string, depth: number): Checked<Node> {

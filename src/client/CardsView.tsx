@@ -1,6 +1,7 @@
 import { isRecord } from '../spec/check.ts'
 import type { Spec } from '../spec/types.ts'
-import { formatErrors, parseSpecInput, type ValidationResult } from '../spec/validate.ts'
+import { specFromArgs } from '../spec/args.ts'
+import { formatErrors } from '../spec/validate.ts'
 import { CardErrorBoundary } from './ErrorBoundary.tsx'
 import { CardsBody } from './render.tsx'
 
@@ -10,16 +11,6 @@ export type ViewState =
   | { readonly kind: 'invalid'; readonly message: string }
   | { readonly kind: 'interrupted' }
   | { readonly kind: 'missing' }
-
-function specFromArgs(argsRaw: unknown): ValidationResult | undefined {
-  if (typeof argsRaw !== 'string') return undefined
-  try {
-    const args: unknown = JSON.parse(argsRaw)
-    return parseSpecInput(isRecord(args) ? args.spec : undefined)
-  } catch {
-    return undefined
-  }
-}
 
 function contentText(content: unknown): string {
   if (typeof content === 'string') return content

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from '@testing-library/react'
+import { act, cleanup, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 import { TurnCardsTail, lastTurnCard } from '../src/client/TurnCardsTail.tsx'
 import { isShown } from '../src/client/shown-cards.ts'
@@ -43,5 +43,27 @@ describe('TurnCardsTail', () => {
     cleanup()
     const none = render(<TurnCardsTail />)
     expect(none.container.innerHTML).toBe('')
+  })
+
+  it('re-renders when the turn data source publishes later (final review #1)', () => {
+    let value: unknown
+    const listeners = new Set<() => void>()
+    const turn = {
+      data: {
+        get: () => value,
+        source: () => ({
+          getSnapshot: () => value,
+          subscribe: (listener: () => void) => { listeners.add(listener); return () => { listeners.delete(listener) } },
+        }),
+      },
+    }
+    const view = render(<TurnCardsTail turn={turn} />)
+    expect(view.container.innerHTML).toBe('')
+    act(() => {
+      value = { cards: [card('t-late', '稍后发布')] }
+      listeners.forEach(listener => listener())
+    })
+    expect(screen.getByText('稍后发布')).toBeTruthy()
+    expect(isShown('t-late')).toBe(true)
   })
 })

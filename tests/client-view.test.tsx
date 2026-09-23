@@ -5,6 +5,8 @@ import { CardsView, deriveViewState } from '../src/client/CardsView.tsx'
 import { CardErrorBoundary } from '../src/client/ErrorBoundary.tsx'
 import { apply, inject, name } from '../src/client/index.ts'
 import { installStyle } from '../src/client/styles.ts'
+import { act } from '@testing-library/react'
+import { markShown } from '../src/client/shown-cards.ts'
 
 afterEach(cleanup)
 
@@ -61,6 +63,25 @@ describe('CardsView', () => {
     cleanup()
     render(<CardsView block={settled({ call: null })} />)
     expect(screen.getByText('卡片数据已不在当前会话窗口中')).toBeTruthy()
+  })
+
+  it('collapses to a note while the same call is shown in the turn tail', () => {
+    const block = { ...settled({}), callId: 'view-1' }
+    render(<CardsView block={block} />)
+    expect(screen.getByText('你好')).toBeTruthy()
+    let release = () => {}
+    act(() => { release = markShown('view-1') })
+    expect(screen.queryByText('你好')).toBeNull()
+    expect(screen.getByText('已生成卡片，见本轮回复末尾')).toBeTruthy()
+    act(() => { release() })
+    expect(screen.getByText('你好')).toBeTruthy()
+  })
+
+  it('keeps invalid notes even when the call id is marked', () => {
+    const release = markShown('view-2')
+    render(<CardsView block={settled({ callId: 'view-2', isError: true, content: [{ type: 'text', text: 'bad' }], error: { name: 'E', code: 'x' } })} />)
+    expect(screen.getByText('界面描述有误，模型正在修正')).toBeTruthy()
+    release()
   })
 })
 

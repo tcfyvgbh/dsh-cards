@@ -1,9 +1,11 @@
+import { useSyncExternalStore } from 'react'
 import { isRecord } from '../spec/check.ts'
 import type { Spec } from '../spec/types.ts'
 import { specFromArgs } from '../spec/args.ts'
 import { formatErrors } from '../spec/validate.ts'
 import { CardErrorBoundary } from './ErrorBoundary.tsx'
 import { CardsBody } from './render.tsx'
+import { isShown, subscribe } from './shown-cards.ts'
 
 export type ViewState =
   | { readonly kind: 'render'; readonly spec: Spec }
@@ -47,10 +49,19 @@ export function deriveViewState(block: unknown): ViewState {
   return parsed.ok ? { kind: 'render', spec: parsed.spec } : { kind: 'invalid', message: formatErrors(parsed.errors) }
 }
 
+function callIdOf(block: unknown): string | undefined {
+  return isRecord(block) && (typeof block.callId === 'string' || typeof block.callId === 'number')
+    ? String(block.callId)
+    : undefined
+}
+
 export function CardsView({ block }: { readonly block?: unknown }) {
   const state = deriveViewState(block)
+  const callId = callIdOf(block)
+  const shownAtTail = useSyncExternalStore(subscribe, () => callId !== undefined && isShown(callId), () => false)
   switch (state.kind) {
     case 'render':
+      if (shownAtTail) return <div className="dshc-root dshc-note">已生成卡片，见本轮回复末尾</div>
       return (
         <CardErrorBoundary raw={JSON.stringify(state.spec, null, 2)}>
           <CardsBody spec={state.spec} />

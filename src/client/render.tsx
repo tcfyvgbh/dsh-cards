@@ -2,6 +2,8 @@ import type { ReactNode } from 'react'
 import type { Node, Spec } from '../spec/types.ts'
 import { renderInline } from './inline.tsx'
 import { Card, Grid, Row } from './nodes/Layout.tsx'
+import { Stat } from './nodes/Stat.tsx'
+import { Table } from './nodes/Table.tsx'
 import { Badge, Callout, KeyValue, ListBlock, TextBlock } from './nodes/Text.tsx'
 
 export function renderNode(node: Node, key: number): ReactNode {
@@ -14,8 +16,8 @@ export function renderNode(node: Node, key: number): ReactNode {
     case 'list': return <ListBlock key={key} node={node} />
     case 'keyvalue': return <KeyValue key={key} node={node} />
     case 'badge': return <Badge key={key} text={node.text} tone={node.tone} />
-    case 'stat': return null
-    case 'table': return null
+    case 'stat': return <Stat key={key} node={node} />
+    case 'table': return <Table key={key} node={node} />
     case 'chart': return null
   }
 }
